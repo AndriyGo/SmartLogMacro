@@ -131,9 +131,32 @@ public struct Log: ExpressionMacro {
     }
 }
 
+public struct SmartLog: ExpressionMacro {
+    public static func expansion(
+        of node: some FreestandingMacroExpansionSyntax,
+        in context: some MacroExpansionContext
+    ) throws -> ExprSyntax {
+        guard node.arguments.count >= 3 && node.arguments.count <= 4 else {
+            throw SmartLogError.wrongNumberOfArguments
+        }
+        // all we need to do is to add another argument `customLoggingFunction`
+        // and call the Log above
+        var nodeCopy = node
+        var arguments = node.arguments
+        arguments.append(LabeledExprSyntax(label: "customLoggingFunction", expression: MemberAccessExprSyntax(
+            base: DeclReferenceExprSyntax(baseName: .identifier("SmartLogMacroCustomLogger")),
+            period: .periodToken(),
+            declName: DeclReferenceExprSyntax(baseName: .identifier("log"))
+        )))
+        nodeCopy.arguments = arguments
+        return try Log.expansion(of: nodeCopy, in: context)
+    }
+}
+
 @main
 struct SmartLogMacroPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
-        Log.self
+        Log.self,
+        SmartLog.self
     ]
 }

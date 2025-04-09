@@ -11,10 +11,30 @@ import SmartLogMacroMacros
 
 let testMacros: [String: Macro.Type] = [
     "log": Log.self,
+    "smartLog": SmartLog.self
 ]
 #endif
 
 final class SmartLogTests: XCTestCase {
+    
+    func testSmartLog() throws {
+        #if canImport(SmartLogMacroMacros)
+        assertMacroExpansion(
+            """
+            #smartLog(logger, .error, "wow \\(a) and \\(b)!", privacy: .private)
+            """,
+            expandedSource: """
+            {
+                logger.log(level: .error, "wow \\(a, privacy: .private) and \\(b, privacy: .private)!")
+                SmartLogMacroCustomLogger.log("wow \\(a) and \\(b)!")
+            }()
+            """,
+            macros: testMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
     
     func testValidPrivacyLevels() throws {
         #if canImport(SmartLogMacroMacros)

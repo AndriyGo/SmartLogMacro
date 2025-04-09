@@ -12,6 +12,10 @@ let package = Package(
             name: "SmartLogMacro",
             targets: ["SmartLogMacro"]
         ),
+        .executable(
+            name: "SmartLogMacroClient",
+            targets: ["SmartLogMacroClient"]
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "600.0.0-latest"),
@@ -22,9 +26,10 @@ let package = Package(
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
-            ]
+            ],
         ),
         .target(name: "SmartLogMacro", dependencies: ["SmartLogMacroMacros"]),
+        .executableTarget(name: "SmartLogMacroClient", dependencies: ["SmartLogMacro"]),
         .testTarget(
             name: "SmartLogTests",
             dependencies: [
