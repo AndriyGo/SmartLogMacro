@@ -64,3 +64,5 @@ public macro smartLog(
     _ message: String,
     privacy: OSLogPrivacy = .auto
 ) = #externalMacro(module: "SmartLogMacroMacros", type: "SmartLog")
+
+public protocol SmartLogMacroDummyProtocol {}
