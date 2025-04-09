@@ -1,4 +1,4 @@
-# SmartLog
+# SmartLogMacro
 
 ✨ Swift macros for easier logging via Apple’s unified logging system with optional 3rd-party logging suport (e.g. Crashlytics)
 
@@ -14,29 +14,29 @@
 
 ## 📦 Installation
 
-SmartLog is available via [Swift Package Manager](https://swift.org/package-manager/).
+SmartLogMacro is available via [Swift Package Manager](https://swift.org/package-manager/).
 
 To add it to your project in Xcode:
 
 1. Open your project.
 2. Go to **File → Add Packages...**
-3. Enter the URL: https://github.com/andriyGo/SmartLog
+3. Enter the URL: https://github.com/andriyGo/SmartLogMacro
 4. Select the version you want to use and press **Add Package**.
 
 Or, add it manually to your `Package.swift`:
 
 ```swift
 dependencies: [
- .package(url: "https://github.com/andriyGo/SmartLog", from: "1.0.0")
+ .package(url: "https://github.com/andriyGo/SmartLogMacro", from: "1.0.0")
 ]
 ```
 
-Then add "SmartLog" to your target dependencies:
+Then add "SmartLogMacro" to your target dependencies:
 
 ```swift
 .target(
    name: "MyTarget",
-   dependencies: [.product(name: "SmartLog", package: "SmartLog")]
+   dependencies: [.product(name: "SmartLogMacro", package: "SmartLogMacro")]
 )
 ```
 
@@ -64,7 +64,7 @@ logger.info("Did select item \(item, privacy: .public) at index path \(indexPath
 
 This gets repetitive — especially when all values share the same privacy level.
 
-With SmartLog, you can write:
+With SmartLogMacro, you can write:
 
 ```swift
 #log(logger, .info, "Did select item \(item) at index path \(indexPath)", privacy: .public)
@@ -80,7 +80,7 @@ logger.log(level: .info, "Did select item \(item, privacy: .public) at index pat
 
 Sometimes you want more than just system logs — for example, sending important logs to a crash reporting tool like [Firebase Crashlytics](https://firebase.google.com/products/crashlytics).
 
-With `SmartLog`, you can specify a `customLoggingFunction` to forward the plain log message wherever you like:
+With `SmartLogMacro`, you can specify a `customLoggingFunction` to forward the plain log message wherever you like:
 
 ```swift
 #log(logger, .error, "Failed to sign out user: \(error)", customLoggingFunction: Crashlytics.crashlytics().log)
@@ -114,7 +114,7 @@ struct CustomLogger {
 
 ## ⚠️ Limitations
 
-SmartLog is designed to be simple and effective out of the box. The current version intentionally keeps the scope focused, but here are a few known limitations:
+SmartLogMacro is designed to be simple and effective out of the box. The current version intentionally keeps the scope focused, but here are a few known limitations:
 
 1. **No trailing closure support for `customLoggingFunction`**  
    You must pass the logging function directly (e.g. `Crashlytics.crashlytics().log`). Trailing closures are not currently supported.
@@ -128,7 +128,7 @@ SmartLog is designed to be simple and effective out of the box. The current vers
 
 ---
 
-💬 Most of these limitations (aside from #2) stem from a desire to keep `SmartLog` lightweight and focused in its initial release.  
+💬 Most of these limitations (aside from #2) stem from a desire to keep `SmartLogMacro` lightweight and focused in its initial release.  
 Suggestions and contributions are very welcome — feel free to open an issue or submit a pull request if you have ideas!
 
 ## 🤝 Contributions
@@ -139,12 +139,12 @@ If you have ideas for improvements, additional features, or run into any issues,
 
 ## ☕️ Support
 
-Enjoying SmartLog? You can [buy me a coffee](https://www.buymeacoffee.com/andriyGo) to support continued development 💙
+Enjoying SmartLogMacro? You can [buy me a coffee](https://www.buymeacoffee.com/andriyGo) to support continued development 💙
 
 ## 📄 License
 
-SmartLog is available under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+SmartLogMacro is available under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
 You are free to use, modify, and distribute this software in compliance with the terms of the license.
 
-See the [LICENSE](LICENSE) file for full details.
+See the [LICENSE](LICENSE.txt) file for full details.
