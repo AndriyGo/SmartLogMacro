@@ -15,9 +15,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "SmartLog"
-               BuildableName = "SmartLog"
-               BlueprintName = "SmartLog"
+               BlueprintIdentifier = "SmartLogMacro"
+               BuildableName = "SmartLogMacro"
+               BlueprintName = "SmartLogMacro"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -62,9 +62,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "SmartLog"
-            BuildableName = "SmartLog"
-            BlueprintName = "SmartLog"
+            BlueprintIdentifier = "SmartLogMacro"
+            BuildableName = "SmartLogMacro"
+            BlueprintName = "SmartLogMacro"
             ReferencedContainer = "container:">
          </BuildableReference>
       </MacroExpansion>

@@ -10,7 +10,7 @@ let package = Package(
     products: [
         .library(
             name: "SmartLogMacro",
-            targets: ["SmartLog"]
+            targets: ["SmartLogMacro"]
         ),
     ],
     dependencies: [
@@ -18,17 +18,17 @@ let package = Package(
     ],
     targets: [
         .macro(
-            name: "SmartLogMacros",
+            name: "SmartLogImplementations",
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
             ]
         ),
-        .target(name: "SmartLog", dependencies: ["SmartLogMacros"]),
+        .target(name: "SmartLogMacro", dependencies: ["SmartLogImplementations"]),
         .testTarget(
             name: "SmartLogTests",
             dependencies: [
-                "SmartLogMacros",
+                "SmartLogImplementations",
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
             ]
         ),
