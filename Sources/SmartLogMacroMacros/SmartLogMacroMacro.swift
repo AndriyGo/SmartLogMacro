@@ -132,7 +132,7 @@ public struct Log: ExpressionMacro {
 }
 
 @main
-struct LoggerMacroPlugin: CompilerPlugin {
+struct SmartLogMacroPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         Log.self
     ]

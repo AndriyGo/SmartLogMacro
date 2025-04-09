@@ -6,7 +6,7 @@ import CompilerPluginSupport
 
 let package = Package(
     name: "SmartLogMacro",
-    platforms: [.macOS(.v11), .iOS(.v15), .tvOS(.v13), .watchOS(.v6), .macCatalyst(.v13), .visionOS(.v1)],
+    platforms: [.macOS(.v11), .iOS(.v15), .tvOS(.v14), .watchOS(.v7), .macCatalyst(.v13), .visionOS(.v1)],
     products: [
         .library(
             name: "SmartLogMacro",
