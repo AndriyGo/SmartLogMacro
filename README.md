@@ -6,11 +6,13 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-%E2%98%95-blue?logo=buymeacoffee&logoColor=white&style=flat)](https://www.buymeacoffee.com/andriyGo)
 
+
 ## ✅ Key benefits
 
 - 🔐 **Privacy made easy** – apply a single `privacy` setting to all interpolated values
 - 🔁 **Optional external logging** – optionally forward the log message to any function (e.g. Crashlytics.crashlytics().log) so you can send it to Crashlytics, analytics platforms, remote log collectors, or anywhere else you like
 - ⚡ **Zero runtime overhead** – macro expands at compile-time
+
 
 ## 📦 Installation
 
@@ -51,6 +53,7 @@ Then add "SmartLogMacro" to your target dependencies:
     customLoggingFunction: ((String) -> Void)? = nil
 )
 ```
+
 
 ## 🚀 Usage
 
@@ -112,6 +115,7 @@ struct CustomLogger {
 #log(logger, .error, "Failed to sign out user: \(error)", customLoggingFunction: CustomLogger.log)
 ```
 
+
 ## ⚠️ Limitations
 
 SmartLogMacro is designed to be simple and effective out of the box. The current version intentionally keeps the scope focused, but here are a few known limitations:
@@ -131,15 +135,18 @@ SmartLogMacro is designed to be simple and effective out of the box. The current
 💬 Most of these limitations (aside from #2) stem from a desire to keep `SmartLogMacro` lightweight and focused in its initial release.  
 Suggestions and contributions are very welcome — feel free to open an issue or submit a pull request if you have ideas!
 
+
 ## 🤝 Contributions
 
 Contributions are welcome!
 
 If you have ideas for improvements, additional features, or run into any issues, feel free to open an issue or submit a pull request. Whether it's bug fixes, documentation, or feature suggestions — all contributions are appreciated!
 
+
 ## ☕️ Support
 
 Enjoying SmartLogMacro? You can [buy me a coffee](https://www.buymeacoffee.com/andriyGo) to support continued development 💙
+
 
 ## 📄 License
 
