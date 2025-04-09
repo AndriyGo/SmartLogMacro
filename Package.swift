@@ -18,17 +18,17 @@ let package = Package(
     ],
     targets: [
         .macro(
-            name: "SmartLogImplementations",
+            name: "SmartLogMacroMacros",
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
             ]
         ),
-        .target(name: "SmartLogMacro", dependencies: ["SmartLogImplementations"]),
+        .target(name: "SmartLogMacro", dependencies: ["SmartLogMacroMacros"]),
         .testTarget(
             name: "SmartLogTests",
             dependencies: [
-                "SmartLogImplementations",
+                "SmartLogMacroMacros",
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
             ]
         ),

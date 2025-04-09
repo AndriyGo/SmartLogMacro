@@ -29,4 +29,4 @@ public macro log(
     _ message: String,
     privacy: OSLogPrivacy = .auto,
     customLoggingFunction: ((String) -> Void)? = nil
-) = #externalMacro(module: "SmartLogImplementations", type: "Log")
+) = #externalMacro(module: "SmartLogMacroMacros", type: "Log")

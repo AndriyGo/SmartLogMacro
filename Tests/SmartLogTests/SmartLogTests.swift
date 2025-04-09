@@ -6,8 +6,8 @@ import XCTest
 import OSLog
 
 // Macro implementations build for the host, so the corresponding module is not available when cross-compiling. Cross-compiled tests may still make use of the macro itself in end-to-end tests.
-#if canImport(SmartLogImplementations)
-import SmartLogImplementations
+#if canImport(SmartLogMacroMacros)
+import SmartLogMacroMacros
 
 let testMacros: [String: Macro.Type] = [
     "log": Log.self,
@@ -17,7 +17,7 @@ let testMacros: [String: Macro.Type] = [
 final class SmartLogTests: XCTestCase {
     
     func testValidPrivacyLevels() throws {
-        #if canImport(SmartLogImplementations)
+        #if canImport(SmartLogMacroMacros)
         assertMacroExpansion(
             """
             #log(logger, .error, "wow \\(a) and \\(b)!", privacy: .private, customLoggingFunction: hey)
@@ -48,7 +48,7 @@ final class SmartLogTests: XCTestCase {
     }
     
     func testValidMessages() throws {
-        #if canImport(SmartLogImplementations)
+        #if canImport(SmartLogMacroMacros)
         assertMacroExpansion(
             """
             #log(logger, .error, "wow", customLoggingFunction: hey)
@@ -103,7 +103,7 @@ final class SmartLogTests: XCTestCase {
     }
     
     func testValidCustomFunctions() throws {
-        #if canImport(SmartLogImplementations)
+        #if canImport(SmartLogMacroMacros)
         assertMacroExpansion(
             """
             #log(logger, .error, "", customLoggingFunction: hey)
@@ -134,7 +134,7 @@ final class SmartLogTests: XCTestCase {
     }
     
     func testvalidLogLevels() throws {
-        #if canImport(SmartLogImplementations)
+        #if canImport(SmartLogMacroMacros)
         assertMacroExpansion(
             """
             #log(logger, .error, "")
@@ -177,7 +177,7 @@ final class SmartLogTests: XCTestCase {
     }
     
     func testvalidLoggerSyntaxes() throws {
-        #if canImport(SmartLogImplementations)
+        #if canImport(SmartLogMacroMacros)
         assertMacroExpansion(
             """
             #log(logger, .debug, "")
