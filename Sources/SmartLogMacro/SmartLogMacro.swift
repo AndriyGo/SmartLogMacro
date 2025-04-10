@@ -1,4 +1,4 @@
-import OSLog
+@_exported import OSLog
 
 /// Logs a message using the Swift Unified Logging system and optionally mirrors the message to a custom logging backend (e.g. Crashlytics).
 ///

@@ -1,11 +1,23 @@
 # SmartLogMacro
 
-✨ Swift macros for easier logging via Apple’s unified logging system with optional 3rd-party logging suport (e.g. Crashlytics)
+### ✨ Swift macros for easier logging via Apple’s unified logging system with optional 3rd-party logging support (e.g. Crashlytics)
 
 [![SPM Compatible](https://img.shields.io/badge/SPM-compatible-brightgreen?logo=swift)](https://swift.org/package-manager/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-%E2%98%95-blue?logo=buymeacoffee&logoColor=white&style=flat)](https://www.buymeacoffee.com/andriyGo)
 
+```swift
+#smartLog(logger, .info, "User \(userId) signed out at \(Date())")
+```
+
+Expands to:
+
+```swift
+{
+    logger.log(level: .info, "User \(userId) signed out at \(Date())")
+    SmartLogMacroCustomLogger.log("User \(userId) signed out at \(Date())")
+}()
+```
 
 ## ✅ Key benefits
 
@@ -54,6 +66,30 @@ Then add "SmartLogMacro" to your target dependencies:
 )
 ```
 
+#### `#smartLog`
+
+```swift
+#smartLog(
+    _ logger: Logger,
+    _ logLevel: OSLogType,
+    _ message: String,
+    privacy: OSLogPrivacy = .auto
+)
+```
+
+Internal implementation is equivalent to calling:
+
+```swift
+#log(
+    logger,
+    logLevel,
+    message,
+    privacy: privacy,
+    customLoggingFunction: SmartLogMacroCustomLogger.log
+)
+```
+
+---
 
 ## 🚀 Usage
 
@@ -83,7 +119,22 @@ logger.log(level: .info, "Did select item \(item, privacy: .public) at index pat
 
 Sometimes you want more than just system logs — for example, sending important logs to a crash reporting tool like [Firebase Crashlytics](https://firebase.google.com/products/crashlytics).
 
-With `SmartLogMacro`, you can specify a `customLoggingFunction` to forward the plain log message wherever you like:
+#### Using `#smartLog`
+
+You can drastically simplify this process by using `#smartLog` macro. You can call `#smartLog(logger, .error, "Failed to sign out user: \(error)")`, which expands to:
+
+```swift
+{
+    logger.log(level: .error, "Failed to sign out user: \(error)")
+    SmartLogMacroCustomLogger.log("Failed to sign out user: \(error)")
+}()
+```
+
+To support this, simply declare a type `SmartLogMacroCustomLogger` with a static function `log` or declare `typealias SmartLogMacroCustomLogger = YourType` where `YourType.log` is a valid implementation.
+
+#### Fine-grained control
+
+If you want more fine-grained control, you can specify a `customLoggingFunction` to forward the plain log message wherever you like:
 
 ```swift
 #log(logger, .error, "Failed to sign out user: \(error)", customLoggingFunction: Crashlytics.crashlytics().log)
@@ -98,7 +149,7 @@ which expands to:
 }()
 ```
 
-If you do not want to be importing Crashlytics in each source file where you use the macro, or if you wish to send your log to more destinations, you can define your own function which will process it, eg:
+If you do not want to be importing Crashlytics in each source file where you use the macro, or if you wish to send your log to more destinations, you can define your own function which will process it, e.g.:
 
 ```swift
 // File: CustomLogger.swift
@@ -107,7 +158,7 @@ import FirebaseCrashlytics
 struct CustomLogger {
     static func log(_ message: String) {
         Crashlytics.crashlytics().log(message)
-        // do other stuff
+        // You can add additional processing, filtering, or forwarding here
     }
 }
 
@@ -115,6 +166,7 @@ struct CustomLogger {
 #log(logger, .error, "Failed to sign out user: \(error)", customLoggingFunction: CustomLogger.log)
 ```
 
+---
 
 ## ⚠️ Limitations
 
@@ -130,11 +182,10 @@ SmartLogMacro is designed to be simple and effective out of the box. The current
 3. **No prefixing or metadata in external logs**  
    Only the raw message string is passed to the `customLoggingFunction`. There is currently no built-in way to include metadata such as log level or category — but this could be extended based on real-world use cases.
 
----
-
 💬 Most of these limitations (aside from #2) stem from a desire to keep `SmartLogMacro` lightweight and focused in its initial release.  
 Suggestions and contributions are very welcome — feel free to open an issue or submit a pull request if you have ideas!
 
+---
 
 ## 🤝 Contributions
 
@@ -142,11 +193,13 @@ Contributions are welcome!
 
 If you have ideas for improvements, additional features, or run into any issues, feel free to open an issue or submit a pull request. Whether it's bug fixes, documentation, or feature suggestions — all contributions are appreciated!
 
+---
 
 ## ☕️ Support
 
 Enjoying SmartLogMacro? You can [buy me a coffee](https://www.buymeacoffee.com/andriyGo) to support continued development 💙
 
+---
 
 ## 📄 License
 
