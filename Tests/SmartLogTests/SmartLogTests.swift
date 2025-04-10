@@ -31,6 +31,18 @@ final class SmartLogTests: XCTestCase {
             """,
             macros: testMacros
         )
+        assertMacroExpansion(
+            """
+            #smartLog(logger, .error, "wow \\(a) and \\(b)!", privacy: .private)
+            """,
+            expandedSource: """
+            {
+                logger.log(level: .error, "wow \\(a, privacy: .private) and \\(b, privacy: .private)!")
+                SmartLogMacroCustomLogger.log("wow \\(a) and \\(b)!")
+            }()
+            """,
+            macros: testMacros
+        )
         #else
         throw XCTSkip("macros are only supported when running tests for the host platform")
         #endif
@@ -113,6 +125,30 @@ final class SmartLogTests: XCTestCase {
             {
                 logger.log(level: .error, "wow \\(a) and \\(b)!")
                 hey("wow \\(a) and \\(b)!")
+            }()
+            """,
+            macros: testMacros
+        )
+        assertMacroExpansion(
+            """
+            #log(logger, .error, #function, customLoggingFunction: hey)
+            """,
+            expandedSource: """
+            {
+                logger.log(level: .error, #function)
+                hey(#function)
+            }()
+            """,
+            macros: testMacros
+        )
+        assertMacroExpansion(
+            """
+            #log(logger, .error, #function(a), customLoggingFunction: hey)
+            """,
+            expandedSource: """
+            {
+                logger.log(level: .error, #function(a))
+                hey(#function(a))
             }()
             """,
             macros: testMacros

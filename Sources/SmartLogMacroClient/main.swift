@@ -9,4 +9,4 @@ struct Custom {
 
 typealias SmartLogMacroCustomLogger = Custom
 
-#smartLog(Logger(), .debug, "wow")
+//#smartLog(Logger(), .debug, "wow")

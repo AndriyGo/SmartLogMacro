@@ -65,15 +65,14 @@ public struct Log: ExpressionMacro {
         guard node.trailingClosure == nil else {
             throw SmartLogError.trailingClosuresNotSupported
         }
-        guard let message = try HelperFunctions.validate(args[2], argName:"message", allowedSyntaxes: [StringLiteralExprSyntax.self]) as? StringLiteralExprSyntax else {
-            throw SmartLogError.unsupportedSyntaxForArgument("message")
-        }
+        let message = try HelperFunctions.validate(args[2], argName:"message", allowedSyntaxes: [StringLiteralExprSyntax.self, MacroExpansionExprSyntax.self])
         let logger = try HelperFunctions.validate(args[0], argName:"logger", allowedSyntaxes: [MemberAccessExprSyntax.self, DeclReferenceExprSyntax.self, FunctionCallExprSyntax.self], memberAccessBaseName: "Logger")
         
         let logLevel = try HelperFunctions.validate(args[1], argName:"logLevel", allowedSyntaxes: [MemberAccessExprSyntax.self, DeclReferenceExprSyntax.self, FunctionCallExprSyntax.self])
-        var logMessageWithPrivacy:StringLiteralExprSyntax
-        if let privacy = try? HelperFunctions.extractNamed("privacy", from: node.arguments, allowedSyntaxes: [MemberAccessExprSyntax.self]) as? MemberAccessExprSyntax {
+        var logMessageWithPrivacy:any ExprSyntaxProtocol
+        if let privacy = try? HelperFunctions.extractNamed("privacy", from: node.arguments, allowedSyntaxes: [MemberAccessExprSyntax.self]) as? MemberAccessExprSyntax, let message = message as? StringLiteralExprSyntax {
             // Privacy option provided, so we must add it to log message
+            var copy = message
             logMessageWithPrivacy = message
             var segments = StringLiteralSegmentListSyntax()
             for segment in message.segments {
@@ -102,7 +101,8 @@ public struct Log: ExpressionMacro {
                     segments.append(segment)
                 }
             }
-            logMessageWithPrivacy.segments = segments
+            copy.segments = segments
+            logMessageWithPrivacy = copy
         }
         else {
             // Privacy not provided, so we log the message as-is
