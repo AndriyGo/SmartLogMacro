@@ -7,17 +7,26 @@
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-%E2%98%95-blue?logo=buymeacoffee&logoColor=white&style=flat)](https://www.buymeacoffee.com/andriyGo)
 
 ```swift
-#smartLog(logger, .info, "User \(userId) signed out at \(Date())")
+#log(logger, .info, "User \(userId) signed out at \(Date())", privacy: .public, customLoggingFunction: YourLogger.log)
 ```
 
 Expands to:
 
 ```swift
 {
-    logger.log(level: .info, "User \(userId) signed out at \(Date())")
-    SmartLogMacroCustomLogger.log("User \(userId) signed out at \(Date())")
+    logger.log(level: .info, "User \(userId, privacy: .public) signed out at \(Date(), privacy: .public)")
+    YourLogger.log("User \(userId) signed out at \(Date())")
 }()
 ```
+
+In addition, there are several shorthand macros available:
+
+| Macro               | Privacy Level | External Logging | Description                                           |
+|--------------------|---------------|------------------|-------------------------------------------------------|
+| `#log`             | configurable  | optional         | Full control over logging behaviour                  |
+| `#logPublic`       | `.public`     | optional         | Shortcut for always-public logs                      |
+| `#smartLog`        | configurable  | always enabled   | Forwards to `SmartLogMacroCustomLogger.log`          |
+| `#smartLogPublic`  | `.public`     | always enabled   | Simplest usage – public logs + external forwarding   |
 
 ---
 
@@ -56,17 +65,6 @@ Then add **SmartLogMacro** to your target dependencies:
     dependencies: [.product(name: "SmartLogMacro", package: "SmartLogMacro")]
 )
 ```
-
----
-
-## 🧾 Available macros
-
-| Macro               | Privacy Level | External Logging | Description                                           |
-|--------------------|---------------|------------------|-------------------------------------------------------|
-| `#log`             | configurable  | optional         | Full control over logging behaviour                  |
-| `#logPublic`       | `.public`     | optional         | Shortcut for always-public logs                      |
-| `#smartLog`        | configurable  | always enabled   | Forwards to `SmartLogMacroCustomLogger.log`          |
-| `#smartLogPublic`  | `.public`     | always enabled   | Simplest usage – public logs + external forwarding   |
 
 ---
 
