@@ -131,6 +131,38 @@ public struct Log: ExpressionMacro {
     }
 }
 
+public struct LogPublic: ExpressionMacro {
+    public static func expansion(
+        of node: some FreestandingMacroExpansionSyntax,
+        in context: some MacroExpansionContext
+    ) throws -> ExprSyntax {
+        guard node.arguments.count >= 3 && node.arguments.count <= 4 else {
+            throw SmartLogError.wrongNumberOfArguments
+        }
+        // all we need to do is to add another argument `customLoggingFunction`
+        // and call the Log above
+        var nodeCopy = node
+        let argumentsCopy = Array(node.arguments)
+        var arguments = LabeledExprListSyntax()
+        var i = 0
+        let privacyArg = LabeledExprSyntax(label: "privacy", expression: MemberAccessExprSyntax(
+            period: .periodToken(),
+            declName: DeclReferenceExprSyntax(baseName: .identifier("public"))))
+        while i < node.arguments.count {
+            if i == 3 {
+                arguments.append(privacyArg)
+            }
+            arguments.append(argumentsCopy[i])
+            i += 1
+        }
+        if i == 3 {
+            arguments.append(privacyArg)
+        }
+        nodeCopy.arguments = arguments
+        return try Log.expansion(of: nodeCopy, in: context)
+    }
+}
+
 public struct SmartLog: ExpressionMacro {
     public static func expansion(
         of node: some FreestandingMacroExpansionSyntax,
@@ -153,10 +185,37 @@ public struct SmartLog: ExpressionMacro {
     }
 }
 
+public struct SmartLogPublic: ExpressionMacro {
+    public static func expansion(
+        of node: some FreestandingMacroExpansionSyntax,
+        in context: some MacroExpansionContext
+    ) throws -> ExprSyntax {
+        guard node.arguments.count == 3 else {
+            throw SmartLogError.wrongNumberOfArguments
+        }
+        // all we need to do is to add another argument `customLoggingFunction`
+        // and call the Log above
+        var nodeCopy = node
+        var arguments = node.arguments
+        arguments.append(LabeledExprSyntax(label: "privacy", expression: MemberAccessExprSyntax(
+            period: .periodToken(),
+            declName: DeclReferenceExprSyntax(baseName: .identifier("public")))))
+        arguments.append(LabeledExprSyntax(label: "customLoggingFunction", expression: MemberAccessExprSyntax(
+            base: DeclReferenceExprSyntax(baseName: .identifier("SmartLogMacroCustomLogger")),
+            period: .periodToken(),
+            declName: DeclReferenceExprSyntax(baseName: .identifier("log"))
+        )))
+        nodeCopy.arguments = arguments
+        return try Log.expansion(of: nodeCopy, in: context)
+    }
+}
+
 @main
 struct SmartLogMacroPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         Log.self,
-        SmartLog.self
+        LogPublic.self,
+        SmartLog.self,
+        SmartLogPublic.self
     ]
 }

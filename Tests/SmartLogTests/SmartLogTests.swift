@@ -11,26 +11,63 @@ import SmartLogMacroMacros
 
 let testMacros: [String: Macro.Type] = [
     "log": Log.self,
-    "smartLog": SmartLog.self
+    "logPublic": LogPublic.self,
+    "smartLog": SmartLog.self,
+    "smartLogPublic": SmartLogPublic.self
 ]
 #endif
 
 final class SmartLogTests: XCTestCase {
     
-    func testSmartLog() throws {
+    func testSmartLogPublic() throws {
         #if canImport(SmartLogMacroMacros)
         assertMacroExpansion(
             """
-            #smartLog(logger, .error, "wow \\(a) and \\(b)!", privacy: .private)
+            #smartLogPublic(logger, .error, "wow \\(a) and \\(b)!")
             """,
             expandedSource: """
             {
-                logger.log(level: .error, "wow \\(a, privacy: .private) and \\(b, privacy: .private)!")
+                logger.log(level: .error, "wow \\(a, privacy: .public) and \\(b, privacy: .public)!")
                 SmartLogMacroCustomLogger.log("wow \\(a) and \\(b)!")
             }()
             """,
             macros: testMacros
         )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+        }
+    
+    func testLogPublic() throws {
+        #if canImport(SmartLogMacroMacros)
+        assertMacroExpansion(
+            """
+            #logPublic(logger, .error, "wow \\(a) and \\(b)!")
+            """,
+            expandedSource: """
+            logger.log(level: .error, "wow \\(a, privacy: .public) and \\(b, privacy: .public)!")
+            """,
+            macros: testMacros
+        )
+        assertMacroExpansion(
+            """
+            #logPublic(logger, .error, "wow \\(a) and \\(b)!", customLoggingFunction: Crashlytics.log)
+            """,
+            expandedSource: """
+            {
+                logger.log(level: .error, "wow \\(a, privacy: .public) and \\(b, privacy: .public)!")
+                Crashlytics.log("wow \\(a) and \\(b)!")
+            }()
+            """,
+            macros: testMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func testSmartLog() throws {
+        #if canImport(SmartLogMacroMacros)
         assertMacroExpansion(
             """
             #smartLog(logger, .error, "wow \\(a) and \\(b)!", privacy: .private)
@@ -180,6 +217,18 @@ final class SmartLogTests: XCTestCase {
             {
                 logger.log(level: .error, "")
                 Class.hey("")
+            }()
+            """,
+            macros: testMacros
+        )
+        assertMacroExpansion(
+            """
+            #log(logger, .error, "", customLoggingFunction: Class.singleton().hey)
+            """,
+            expandedSource: """
+            {
+                logger.log(level: .error, "")
+                Class.singleton().hey("")
             }()
             """,
             macros: testMacros

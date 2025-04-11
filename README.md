@@ -19,12 +19,15 @@ Expands to:
 }()
 ```
 
+---
+
 ## ✅ Key benefits
 
 - 🔐 **Privacy made easy** – apply a single `privacy` setting to all interpolated values
-- 🔁 **Optional external logging** – optionally forward the log message to any function (e.g. Crashlytics.crashlytics().log) so you can send it to Crashlytics, analytics platforms, remote log collectors, or anywhere else you like
+- 🔁 **Optional external logging** – forward the log message to any function (e.g. Crashlytics.crashlytics().log)
 - ⚡ **Zero runtime overhead** – macro expands at compile-time
 
+---
 
 ## 📦 Installation
 
@@ -41,53 +44,29 @@ Or, add it manually to your `Package.swift`:
 
 ```swift
 dependencies: [
- .package(url: "https://github.com/andriyGo/SmartLogMacro", from: "1.0.0")
+    .package(url: "https://github.com/andriyGo/SmartLogMacro", from: "1.0.0")
 ]
 ```
 
-Then add "SmartLogMacro" to your target dependencies:
+Then add **SmartLogMacro** to your target dependencies:
 
 ```swift
 .target(
-   name: "MyTarget",
-   dependencies: [.product(name: "SmartLogMacro", package: "SmartLogMacro")]
+    name: "MyTarget",
+    dependencies: [.product(name: "SmartLogMacro", package: "SmartLogMacro")]
 )
 ```
 
-### 🧾 Macro signature
+---
 
-```swift
-#log(
-    _ logger: Logger,
-    _ logLevel: OSLogType,
-    _ message: String,
-    privacy: OSLogPrivacy = .auto,
-    customLoggingFunction: ((String) -> Void)? = nil
-)
-```
+## 🧾 Available macros
 
-#### `#smartLog`
-
-```swift
-#smartLog(
-    _ logger: Logger,
-    _ logLevel: OSLogType,
-    _ message: String,
-    privacy: OSLogPrivacy = .auto
-)
-```
-
-Internal implementation is equivalent to calling:
-
-```swift
-#log(
-    logger,
-    logLevel,
-    message,
-    privacy: privacy,
-    customLoggingFunction: SmartLogMacroCustomLogger.log
-)
-```
+| Macro               | Privacy Level | External Logging | Description                                           |
+|--------------------|---------------|------------------|-------------------------------------------------------|
+| `#log`             | configurable  | optional         | Full control over logging behaviour                  |
+| `#logPublic`       | `.public`     | optional         | Shortcut for always-public logs                      |
+| `#smartLog`        | configurable  | always enabled   | Forwards to `SmartLogMacroCustomLogger.log`          |
+| `#smartLogPublic`  | `.public`     | always enabled   | Simplest usage – public logs + external forwarding   |
 
 ---
 
@@ -95,116 +74,106 @@ Internal implementation is equivalent to calling:
 
 ### 🔐 One-line privacy control for multiple values
 
-With Apple's `Logger`, every interpolated value normally requires an explicit `privacy` annotation:
+With Apple's `Logger`:
 
 ```swift
-logger.info("Did select item \(item, privacy: .public) at index path \(indexPath, privacy: .public)")
+logger.info("Item \(item, privacy: .public) at \(indexPath, privacy: .public)")
 ```
 
-This gets repetitive — especially when all values share the same privacy level.
-
-With SmartLogMacro, you can write:
+With SmartLogMacro:
 
 ```swift
-#log(logger, .info, "Did select item \(item) at index path \(indexPath)", privacy: .public)
+#log(logger, .info, "Item \(item) at \(indexPath)", privacy: .public)
 ```
 
-which expands to:
+Expands to:
 
 ```swift
-logger.log(level: .info, "Did select item \(item, privacy: .public) at index path \(indexPath, privacy: .public)")
+logger.log(level: .info, "Item \(item, privacy: .public) at \(indexPath, privacy: .public)")
 ```
+
+Or even shorter:
+
+```swift
+#logPublic(logger, .info, "Item \(item) at \(indexPath)")
+```
+
+---
 
 ### 🔁 Send logs to 3rd-party systems (like Crashlytics)
 
-Sometimes you want more than just system logs — for example, sending important logs to a crash reporting tool like [Firebase Crashlytics](https://firebase.google.com/products/crashlytics).
-
-#### Using `#smartLog`
-
-You can drastically simplify this process by using `#smartLog` macro. You can call `#smartLog(logger, .error, "Failed to sign out user: \(error)")`, which expands to:
+#### Using `#smartLog` or `#smartLogPublic`
 
 ```swift
-{
-    logger.log(level: .error, "Failed to sign out user: \(error)")
-    SmartLogMacroCustomLogger.log("Failed to sign out user: \(error)")
-}()
+#smartLog(logger, .error, "Sign-out failed for user: \(userId)")
+#smartLogPublic(logger, .info, "User signed in: \(userId)")
 ```
 
-To support this, simply declare a type `SmartLogMacroCustomLogger` with a static function `log` or declare `typealias SmartLogMacroCustomLogger = YourType` where `YourType.log` is a valid implementation.
+To enable this, define:
+
+```swift
+struct SmartLogMacroCustomLogger {
+    static func log(_ message: String) {
+        Crashlytics.crashlytics().log(message)
+    }
+}
+```
+
+Or use:
+
+```swift
+typealias SmartLogMacroCustomLogger = MyLogger
+```
+
+---
 
 #### Fine-grained control
 
-If you want more fine-grained control, you can specify a `customLoggingFunction` to forward the plain log message wherever you like:
-
 ```swift
-#log(logger, .error, "Failed to sign out user: \(error)", customLoggingFunction: Crashlytics.crashlytics().log)
+#log(logger, .error, "Error: \(error)", customLoggingFunction: Crashlytics.crashlytics().log)
+#logPublic(logger, .error, "Unexpected logout", customLoggingFunction: MyLogger.send)
 ```
 
-which expands to:
+Define your own custom logger:
 
 ```swift
-{
-    logger.log(level: .error, "Failed to sign out user: \(error)")
-    Crashlytics.crashlytics().log("Failed to sign out user: \(error)")
-}()
-```
-
-If you do not want to be importing Crashlytics in each source file where you use the macro, or if you wish to send your log to more destinations, you can define your own function which will process it, e.g.:
-
-```swift
-// File: CustomLogger.swift
-import FirebaseCrashlytics
-
 struct CustomLogger {
     static func log(_ message: String) {
         Crashlytics.crashlytics().log(message)
-        // You can add additional processing, filtering, or forwarding here
+        Analytics.logEvent("log", parameters: ["message": message])
     }
 }
-
-// File: any other file
-#log(logger, .error, "Failed to sign out user: \(error)", customLoggingFunction: CustomLogger.log)
 ```
 
 ---
 
 ## ⚠️ Limitations
 
-SmartLogMacro is designed to be simple and effective out of the box. The current version intentionally keeps the scope focused, but here are a few known limitations:
-
 1. **No trailing closure support for `customLoggingFunction`**  
-   You must pass the logging function directly (e.g. `Crashlytics.crashlytics().log`). Trailing closures are not currently supported.
-
 2. **Expanded macro uses a code block**  
-   When `customLoggingFunction` is used, the macro expands to a closure block (`{ ... }()`), which can make it harder to associate the log message in the Xcode console with a precise line number in your code.  
-   This will be improved once [`codeItem` freestanding macros](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0397-freestanding-declaration-macros.md) are no longer experimental.
-
+   May affect Xcode console line numbers.
 3. **No prefixing or metadata in external logs**  
-   Only the raw message string is passed to the `customLoggingFunction`. There is currently no built-in way to include metadata such as log level or category — but this could be extended based on real-world use cases.
+   Only raw message is passed.
 
-💬 Most of these limitations (aside from #2) stem from a desire to keep `SmartLogMacro` lightweight and focused in its initial release.  
-Suggestions and contributions are very welcome — feel free to open an issue or submit a pull request if you have ideas!
+💬 Most of these limitations stem from the desire to keep SmartLogMacro lightweight and simple in v1.
 
 ---
 
 ## 🤝 Contributions
 
-Contributions are welcome!
-
-If you have ideas for improvements, additional features, or run into any issues, feel free to open an issue or submit a pull request. Whether it's bug fixes, documentation, or feature suggestions — all contributions are appreciated!
+Contributions are welcome!  
+Open an issue or pull request — all feedback is appreciated.
 
 ---
 
 ## ☕️ Support
 
-Enjoying SmartLogMacro? You can [buy me a coffee](https://www.buymeacoffee.com/andriyGo) to support continued development 💙
+Enjoying SmartLogMacro?  
+[Buy me a coffee](https://www.buymeacoffee.com/andriyGo) ☕💙
 
 ---
 
 ## 📄 License
 
-SmartLogMacro is available under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
-
-You are free to use, modify, and distribute this software in compliance with the terms of the license.
-
+SmartLogMacro is available under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).  
 See the [LICENSE](LICENSE.txt) file for full details.
