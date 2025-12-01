@@ -153,7 +153,7 @@ struct CustomLogger {
 3. **No prefixing or metadata in external logs**  
    Only raw message is passed.
 
-💬 Most of these limitations stem from the desire to keep SmartLogMacro lightweight and simple in v1.
+💬 Most of these limitations stem from the desire to keep SmartLogMacro lightweight and simple until community feedback arrives.
 
 ---
 
