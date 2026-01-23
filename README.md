@@ -13,10 +13,7 @@
 Expands to:
 
 ```swift
-{
-    logger.log(level: .info, "User \(userId, privacy: .public) signed out at \(Date(), privacy: .public)")
-    YourLogger.log("[logger] Info: User \(userId) signed out at \(Date())")
-}()
+_ = (logger.log(level: .info, "User \(userId, privacy: .public) signed out at \(Date(), privacy: .public)"), YourLogger.log("[logger] Info: User \(userId) signed out at \(Date())"))
 ```
 
 In addition, there are several shorthand macros available:
@@ -186,8 +183,8 @@ The category and log level are extracted at compile-time with **zero runtime ove
 ## ⚠️ Limitations
 
 1. **No trailing closure support for `customLoggingFunction`**  
-2. **Expanded macro uses a code block**  
-   May affect Xcode console line numbers.
+2. **Expanded macro expands to a single-line tuple expression**  
+   This avoids introducing extra lines, but the expression result is discarded with `_ = (...)`.
 3. **Category extraction requires consistent naming**  
    Use `.categoryName` or `Logger.categoryName` syntax for best results.
 
