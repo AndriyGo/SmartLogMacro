@@ -28,7 +28,7 @@ final class SmartLogTests: XCTestCase {
             expandedSource: """
             {
                 logger.log(level: .error, "wow \\(a, privacy: .public) and \\(b, privacy: .public)!")
-                SmartLogMacroCustomLogger.log("wow \\(a) and \\(b)!")
+                SmartLogMacroCustomLogger.log("[logger] Error: wow \\(a) and \\(b)!")
             }()
             """,
             macros: testMacros
@@ -56,7 +56,7 @@ final class SmartLogTests: XCTestCase {
             expandedSource: """
             {
                 logger.log(level: .error, "wow \\(a, privacy: .public) and \\(b, privacy: .public)!")
-                Crashlytics.log("wow \\(a) and \\(b)!")
+                Crashlytics.log("[logger] Error: wow \\(a) and \\(b)!")
             }()
             """,
             macros: testMacros
@@ -75,7 +75,7 @@ final class SmartLogTests: XCTestCase {
             expandedSource: """
             {
                 logger.log(level: .error, "wow \\(a, privacy: .private) and \\(b, privacy: .private)!")
-                SmartLogMacroCustomLogger.log("wow \\(a) and \\(b)!")
+                SmartLogMacroCustomLogger.log("[logger] Error: wow \\(a) and \\(b)!")
             }()
             """,
             macros: testMacros
@@ -94,7 +94,7 @@ final class SmartLogTests: XCTestCase {
             expandedSource: """
             {
                 logger.log(level: .error, "wow \\(a, privacy: .private) and \\(b, privacy: .private)!")
-                hey("wow \\(a) and \\(b)!")
+                hey("[logger] Error: wow \\(a) and \\(b)!")
             }()
             """,
             macros: testMacros
@@ -106,7 +106,7 @@ final class SmartLogTests: XCTestCase {
             expandedSource: """
             {
                 logger.log(level: .error, "wow \\(a, privacy: OSLogPrivacy.private) and \\(b, privacy: OSLogPrivacy.private)!")
-                hey("wow \\(a) and \\(b)!")
+                hey("[logger] Error: wow \\(a) and \\(b)!")
             }()
             """,
             macros: testMacros
@@ -125,7 +125,7 @@ final class SmartLogTests: XCTestCase {
             expandedSource: """
             {
                 logger.log(level: .error, "wow")
-                hey("wow")
+                hey("[logger] Error: wow")
             }()
             """,
             macros: testMacros
@@ -137,7 +137,7 @@ final class SmartLogTests: XCTestCase {
             expandedSource: """
             {
                 logger.log(level: .error, "wow \\(a)")
-                hey("wow \\(a)")
+                hey("[logger] Error: wow \\(a)")
             }()
             """,
             macros: testMacros
@@ -149,7 +149,7 @@ final class SmartLogTests: XCTestCase {
             expandedSource: """
             {
                 logger.log(level: .error, "wow \\(a) and \\(b)")
-                hey("wow \\(a) and \\(b)")
+                hey("[logger] Error: wow \\(a) and \\(b)")
             }()
             """,
             macros: testMacros
@@ -161,7 +161,7 @@ final class SmartLogTests: XCTestCase {
             expandedSource: """
             {
                 logger.log(level: .error, "wow \\(a) and \\(b)!")
-                hey("wow \\(a) and \\(b)!")
+                hey("[logger] Error: wow \\(a) and \\(b)!")
             }()
             """,
             macros: testMacros
@@ -173,7 +173,7 @@ final class SmartLogTests: XCTestCase {
             expandedSource: """
             {
                 logger.log(level: .error, #function)
-                hey(#function)
+                hey("[logger] Error: \\(#function)")
             }()
             """,
             macros: testMacros
@@ -185,7 +185,7 @@ final class SmartLogTests: XCTestCase {
             expandedSource: """
             {
                 logger.log(level: .error, #function(a))
-                hey(#function(a))
+                hey("[logger] Error: \\(#function(a))")
             }()
             """,
             macros: testMacros
@@ -204,7 +204,7 @@ final class SmartLogTests: XCTestCase {
             expandedSource: """
             {
                 logger.log(level: .error, "")
-                hey("")
+                hey("[logger] Error: ")
             }()
             """,
             macros: testMacros
@@ -216,7 +216,7 @@ final class SmartLogTests: XCTestCase {
             expandedSource: """
             {
                 logger.log(level: .error, "")
-                Class.hey("")
+                Class.hey("[logger] Error: ")
             }()
             """,
             macros: testMacros
@@ -228,7 +228,7 @@ final class SmartLogTests: XCTestCase {
             expandedSource: """
             {
                 logger.log(level: .error, "")
-                Class.singleton().hey("")
+                Class.singleton().hey("[logger] Error: ")
             }()
             """,
             macros: testMacros
@@ -325,6 +325,81 @@ final class SmartLogTests: XCTestCase {
             """,
             expandedSource: """
             Logger.init(subsystem: "sub", category: "cat").log(level: .debug, "")
+            """,
+            macros: testMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func testLoggerCategoryExtraction() throws {
+        #if canImport(SmartLogMacroMacros)
+        // Test .network syntax
+        assertMacroExpansion(
+            """
+            #log(.network, .info, "test", customLoggingFunction: hey)
+            """,
+            expandedSource: """
+            {
+                Logger.network.log(level: .info, "test")
+                hey("[network] Info: test")
+            }()
+            """,
+            macros: testMacros
+        )
+        
+        // Test Logger.auth syntax
+        assertMacroExpansion(
+            """
+            #log(Logger.auth, .error, "failed", customLoggingFunction: hey)
+            """,
+            expandedSource: """
+            {
+                Logger.auth.log(level: .error, "failed")
+                hey("[auth] Error: failed")
+            }()
+            """,
+            macros: testMacros
+        )
+        
+        // Test different log levels get capitalized properly
+        assertMacroExpansion(
+            """
+            #log(.database, .debug, "query", customLoggingFunction: hey)
+            """,
+            expandedSource: """
+            {
+                Logger.database.log(level: .debug, "query")
+                hey("[database] Debug: query")
+            }()
+            """,
+            macros: testMacros
+        )
+        
+        assertMacroExpansion(
+            """
+            #log(.api, .fault, "critical", customLoggingFunction: hey)
+            """,
+            expandedSource: """
+            {
+                Logger.api.log(level: .fault, "critical")
+                hey("[api] Fault: critical")
+            }()
+            """,
+            macros: testMacros
+        )
+        
+        // Test OSLogType.error (non-member access with base)
+        assertMacroExpansion(
+            """
+            #log(.network, OSLogType.error, "test", customLoggingFunction: hey)
+            """,
+            expandedSource: """
+            {
+                Logger.network.log(level: OSLogType.error, "test")
+                hey("[network] Error: test")
+            }()
             """,
             macros: testMacros
         )

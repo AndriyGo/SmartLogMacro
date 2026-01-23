@@ -69,7 +69,36 @@ public struct Log: ExpressionMacro {
         let logger = try HelperFunctions.validate(args[0], argName:"logger", allowedSyntaxes: [MemberAccessExprSyntax.self, DeclReferenceExprSyntax.self, FunctionCallExprSyntax.self], memberAccessBaseName: "Logger")
         
         let logLevel = try HelperFunctions.validate(args[1], argName:"logLevel", allowedSyntaxes: [MemberAccessExprSyntax.self, DeclReferenceExprSyntax.self, FunctionCallExprSyntax.self])
-        var logMessageWithPrivacy:any ExprSyntaxProtocol
+        
+        // Extract category from logger
+        let category: String
+        if let memberAccess = logger.as(MemberAccessExprSyntax.self) {
+            // Handles both "Logger.network" and ".network"
+            category = memberAccess.declName.baseName.text
+        } else if let identifierExpr = logger.as(DeclReferenceExprSyntax.self) {
+            // Handles "networkLogger" variable name
+            category = identifierExpr.baseName.text
+        } else if let functionCall = logger.as(FunctionCallExprSyntax.self),
+                  let memberAccess = functionCall.calledExpression.as(MemberAccessExprSyntax.self) {
+            // Handles Logger.init(...) or similar
+            category = memberAccess.declName.baseName.text
+        } else {
+            category = "Unknown"
+        }
+        
+        // Extract and format log level
+        let levelString: String
+        if let memberAccess = logLevel.as(MemberAccessExprSyntax.self) {
+            // Extract the member name (e.g., "info", "debug", "error")
+            let levelName = memberAccess.declName.baseName.text
+            // Capitalize first letter
+            levelString = levelName.prefix(1).uppercased() + levelName.dropFirst()
+        } else {
+            // For variables or function calls, use the expression as-is
+            levelString = logLevel.description
+        }
+        
+        var logMessageWithPrivacy: any ExprSyntaxProtocol
         if let privacy = try? HelperFunctions.extractNamed("privacy", from: node.arguments, allowedSyntaxes: [MemberAccessExprSyntax.self]) as? MemberAccessExprSyntax, let message = message as? StringLiteralExprSyntax {
             // Privacy option provided, so we must add it to log message
             var copy = message
@@ -108,14 +137,37 @@ public struct Log: ExpressionMacro {
             // Privacy not provided, so we log the message as-is
             logMessageWithPrivacy = message
         }
+        
         do {
             let customLoggingFunction = try HelperFunctions.extractNamed("customLoggingFunction", from: node.arguments, allowedSyntaxes: [DeclReferenceExprSyntax.self, MemberAccessExprSyntax.self])
-            return try ExprSyntax(validating: ExprSyntax(#"""
-                {
-                \#(logger).log(level: \#(logLevel), \#(logMessageWithPrivacy))
-                \#(customLoggingFunction)(\#(message))
-                }()
-                """#))
+            // Build the formatted message for custom logging
+                let formattedMessage: ExprSyntax
+                if let stringLiteral = message.as(StringLiteralExprSyntax.self) {
+                    // It's a string literal, we need to prepend the category and level
+                    var segments = StringLiteralSegmentListSyntax()
+                    
+                    // Add the prefix: "[category] Level: "
+                    segments.append(.stringSegment(StringSegmentSyntax(content: .stringSegment("[\(category)] \(levelString): "))))
+                    
+                    // Add all the original segments
+                    for segment in stringLiteral.segments {
+                        segments.append(segment)
+                    }
+                    
+                    var newStringLiteral = stringLiteral
+                    newStringLiteral.segments = segments
+                    formattedMessage = ExprSyntax(newStringLiteral)
+                } else {
+                    // It's a macro expansion like #function, wrap it
+                    formattedMessage = ExprSyntax(stringLiteral: "\"[\(category)] \(levelString): \\(\(message))\"")
+                }
+                
+                return """
+                    {
+                    \(logger).log(level: \(logLevel), \(logMessageWithPrivacy))
+                    \(customLoggingFunction)(\(formattedMessage))
+                    }()
+                    """
         }
         catch {
             if case SmartLogError.missingArgument(_) = error {

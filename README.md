@@ -1,6 +1,6 @@
 # SmartLogMacro
 
-### ✨ Swift macros for easier logging via Apple’s unified logging system with optional 3rd-party logging support (e.g. Crashlytics)
+### ✨ Swift macros for easier logging via Apple's unified logging system with optional 3rd-party logging support (e.g. Crashlytics)
 
 [![SPM Compatible](https://img.shields.io/badge/SPM-compatible-brightgreen?logo=swift)](https://swift.org/package-manager/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -15,7 +15,7 @@ Expands to:
 ```swift
 {
     logger.log(level: .info, "User \(userId, privacy: .public) signed out at \(Date(), privacy: .public)")
-    YourLogger.log("User \(userId) signed out at \(Date())")
+    YourLogger.log("[logger] Info: User \(userId) signed out at \(Date())")
 }()
 ```
 
@@ -26,15 +26,16 @@ In addition, there are several shorthand macros available:
 | `#log`             | configurable  | optional         | Full control over logging behaviour                  |
 | `#logPublic`       | `.public`     | optional         | Shortcut for always-public logs                      |
 | `#smartLog`        | configurable  | always enabled   | Forwards to `SmartLogMacroCustomLogger.log`          |
-| `#smartLogPublic`  | `.public`     | always enabled   | Simplest usage – public logs + external forwarding   |
+| `#smartLogPublic`  | `.public`     | always enabled   | Simplest usage — public logs + external forwarding   |
 
 ---
 
 ## ✅ Key benefits
 
-- 🔐 **Privacy made easy** – apply a single `privacy` setting to all interpolated values
-- 🔁 **Optional external logging** – forward the log message to any function (e.g. Crashlytics.crashlytics().log)
-- ⚡ **Zero runtime overhead** – macro expands at compile-time
+- 🔒 **Privacy made easy** — apply a single `privacy` setting to all interpolated values
+- 📤 **Optional external logging** — forward the log message to any function (e.g. Crashlytics.crashlytics().log)
+- 🏷️ **Automatic formatting** — external logs include logger category and severity level
+- ⚡ **Zero runtime overhead** — macro expands at compile-time
 
 ---
 
@@ -70,7 +71,7 @@ Then add **SmartLogMacro** to your target dependencies:
 
 ## 🚀 Usage
 
-### 🔐 One-line privacy control for multiple values
+### 🔒 One-line privacy control for multiple values
 
 With Apple's `Logger`:
 
@@ -98,13 +99,21 @@ Or even shorter:
 
 ---
 
-### 🔁 Send logs to 3rd-party systems (like Crashlytics)
+### 📤 Send logs to 3rd-party systems (like Crashlytics)
+
+External logs are automatically formatted with **`[category] Level: message`** for better readability and filtering.
 
 #### Using `#smartLog` or `#smartLogPublic`
 
 ```swift
-#smartLog(logger, .error, "Sign-out failed for user: \(userId)")
-#smartLogPublic(logger, .info, "User signed in: \(userId)")
+#smartLog(.auth, .error, "Sign-out failed for user: \(userId)")
+#smartLogPublic(.network, .info, "Request completed in \(duration)ms")
+```
+
+External logs will appear as:
+```
+[auth] Error: Sign-out failed for user: 12345
+[network] Info: Request completed in 234ms
 ```
 
 To enable this, define:
@@ -128,8 +137,14 @@ typealias SmartLogMacroCustomLogger = MyLogger
 #### Fine-grained control
 
 ```swift
-#log(logger, .error, "Error: \(error)", customLoggingFunction: Crashlytics.crashlytics().log)
-#logPublic(logger, .error, "Unexpected logout", customLoggingFunction: MyLogger.send)
+#log(.database, .error, "Query failed: \(error)", customLoggingFunction: Crashlytics.crashlytics().log)
+#logPublic(.api, .debug, "Response received", customLoggingFunction: MyLogger.send)
+```
+
+External logs will be formatted as:
+```
+[database] Error: Query failed: timeout
+[api] Debug: Response received
 ```
 
 Define your own custom logger:
@@ -145,13 +160,36 @@ struct CustomLogger {
 
 ---
 
+## 🏷️ Logger Category Extraction
+
+SmartLogMacro automatically extracts the logger category for external logging:
+
+```swift
+// Using shorthand syntax (.network)
+#smartLogPublic(.network, .info, "Request sent")
+// External log: "[network] Info: Request sent"
+
+// Using full syntax (Logger.auth)
+#smartLogPublic(Logger.auth, .error, "Login failed")
+// External log: "[auth] Error: Login failed"
+
+// Using variable names
+let apiLogger = Logger(...)
+#smartLogPublic(apiLogger, .debug, "Testing")
+// External log: "[apiLogger] Debug: Testing"
+```
+
+The category and log level are extracted at compile-time with **zero runtime overhead**.
+
+---
+
 ## ⚠️ Limitations
 
 1. **No trailing closure support for `customLoggingFunction`**  
 2. **Expanded macro uses a code block**  
    May affect Xcode console line numbers.
-3. **No prefixing or metadata in external logs**  
-   Only raw message is passed.
+3. **Category extraction requires consistent naming**  
+   Use `.categoryName` or `Logger.categoryName` syntax for best results.
 
 💬 Most of these limitations stem from the desire to keep SmartLogMacro lightweight and simple until community feedback arrives.
 
