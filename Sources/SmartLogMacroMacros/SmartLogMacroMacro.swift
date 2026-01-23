@@ -162,12 +162,7 @@ public struct Log: ExpressionMacro {
                     formattedMessage = ExprSyntax(stringLiteral: "\"[\(category)] \(levelString): \\(\(message))\"")
                 }
                 
-                return """
-                    {
-                    \(logger).log(level: \(logLevel), \(logMessageWithPrivacy))
-                    \(customLoggingFunction)(\(formattedMessage))
-                    }()
-                    """
+                return try ExprSyntax(validating: ExprSyntax(#"_ = (\#(logger).log(level: \#(logLevel), \#(logMessageWithPrivacy)), \#(customLoggingFunction)(\#(formattedMessage)))"#))
         }
         catch {
             if case SmartLogError.missingArgument(_) = error {

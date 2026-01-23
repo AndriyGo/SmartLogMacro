@@ -26,11 +26,8 @@ final class SmartLogTests: XCTestCase {
             #smartLogPublic(logger, .error, "wow \\(a) and \\(b)!")
             """,
             expandedSource: """
-            {
-                logger.log(level: .error, "wow \\(a, privacy: .public) and \\(b, privacy: .public)!")
-                SmartLogMacroCustomLogger.log("[logger] Error: wow \\(a) and \\(b)!")
-            }()
-            """,
+_ = (logger.log(level: .error, "wow \\(a, privacy: .public) and \\(b, privacy: .public)!"), SmartLogMacroCustomLogger.log("[logger] Error: wow \\(a) and \\(b)!"))
+""",
             macros: testMacros
         )
         #else
@@ -54,11 +51,8 @@ final class SmartLogTests: XCTestCase {
             #logPublic(logger, .error, "wow \\(a) and \\(b)!", customLoggingFunction: Crashlytics.log)
             """,
             expandedSource: """
-            {
-                logger.log(level: .error, "wow \\(a, privacy: .public) and \\(b, privacy: .public)!")
-                Crashlytics.log("[logger] Error: wow \\(a) and \\(b)!")
-            }()
-            """,
+_ = (logger.log(level: .error, "wow \\(a, privacy: .public) and \\(b, privacy: .public)!"), Crashlytics.log("[logger] Error: wow \\(a) and \\(b)!"))
+""",
             macros: testMacros
         )
         #else
@@ -73,11 +67,8 @@ final class SmartLogTests: XCTestCase {
             #smartLog(logger, .error, "wow \\(a) and \\(b)!", privacy: .private)
             """,
             expandedSource: """
-            {
-                logger.log(level: .error, "wow \\(a, privacy: .private) and \\(b, privacy: .private)!")
-                SmartLogMacroCustomLogger.log("[logger] Error: wow \\(a) and \\(b)!")
-            }()
-            """,
+_ = (logger.log(level: .error, "wow \\(a, privacy: .private) and \\(b, privacy: .private)!"), SmartLogMacroCustomLogger.log("[logger] Error: wow \\(a) and \\(b)!"))
+""",
             macros: testMacros
         )
         #else
@@ -92,11 +83,8 @@ final class SmartLogTests: XCTestCase {
             #log(logger, .error, "wow \\(a) and \\(b)!", privacy: .private, customLoggingFunction: hey)
             """,
             expandedSource: """
-            {
-                logger.log(level: .error, "wow \\(a, privacy: .private) and \\(b, privacy: .private)!")
-                hey("[logger] Error: wow \\(a) and \\(b)!")
-            }()
-            """,
+_ = (logger.log(level: .error, "wow \\(a, privacy: .private) and \\(b, privacy: .private)!"), hey("[logger] Error: wow \\(a) and \\(b)!"))
+""",
             macros: testMacros
         )
         assertMacroExpansion(
@@ -104,11 +92,8 @@ final class SmartLogTests: XCTestCase {
             #log(logger, .error, "wow \\(a) and \\(b)!", privacy: OSLogPrivacy.private, customLoggingFunction: hey)
             """,
             expandedSource: """
-            {
-                logger.log(level: .error, "wow \\(a, privacy: OSLogPrivacy.private) and \\(b, privacy: OSLogPrivacy.private)!")
-                hey("[logger] Error: wow \\(a) and \\(b)!")
-            }()
-            """,
+_ = (logger.log(level: .error, "wow \\(a, privacy: OSLogPrivacy.private) and \\(b, privacy: OSLogPrivacy.private)!"), hey("[logger] Error: wow \\(a) and \\(b)!"))
+""",
             macros: testMacros
         )
         #else
@@ -123,11 +108,8 @@ final class SmartLogTests: XCTestCase {
             #log(logger, .error, "wow", customLoggingFunction: hey)
             """,
             expandedSource: """
-            {
-                logger.log(level: .error, "wow")
-                hey("[logger] Error: wow")
-            }()
-            """,
+_ = (logger.log(level: .error, "wow"), hey("[logger] Error: wow"))
+""",
             macros: testMacros
         )
         assertMacroExpansion(
@@ -135,11 +117,8 @@ final class SmartLogTests: XCTestCase {
             #log(logger, .error, "wow \\(a)", customLoggingFunction: hey)
             """,
             expandedSource: """
-            {
-                logger.log(level: .error, "wow \\(a)")
-                hey("[logger] Error: wow \\(a)")
-            }()
-            """,
+_ = (logger.log(level: .error, "wow \\(a)"), hey("[logger] Error: wow \\(a)"))
+""",
             macros: testMacros
         )
         assertMacroExpansion(
@@ -147,11 +126,8 @@ final class SmartLogTests: XCTestCase {
             #log(logger, .error, "wow \\(a) and \\(b)", customLoggingFunction: hey)
             """,
             expandedSource: """
-            {
-                logger.log(level: .error, "wow \\(a) and \\(b)")
-                hey("[logger] Error: wow \\(a) and \\(b)")
-            }()
-            """,
+_ = (logger.log(level: .error, "wow \\(a) and \\(b)"), hey("[logger] Error: wow \\(a) and \\(b)"))
+""",
             macros: testMacros
         )
         assertMacroExpansion(
@@ -159,11 +135,8 @@ final class SmartLogTests: XCTestCase {
             #log(logger, .error, "wow \\(a) and \\(b)!", customLoggingFunction: hey)
             """,
             expandedSource: """
-            {
-                logger.log(level: .error, "wow \\(a) and \\(b)!")
-                hey("[logger] Error: wow \\(a) and \\(b)!")
-            }()
-            """,
+_ = (logger.log(level: .error, "wow \\(a) and \\(b)!"), hey("[logger] Error: wow \\(a) and \\(b)!"))
+""",
             macros: testMacros
         )
         assertMacroExpansion(
@@ -171,11 +144,8 @@ final class SmartLogTests: XCTestCase {
             #log(logger, .error, #function, customLoggingFunction: hey)
             """,
             expandedSource: """
-            {
-                logger.log(level: .error, #function)
-                hey("[logger] Error: \\(#function)")
-            }()
-            """,
+_ = (logger.log(level: .error, #function), hey("[logger] Error: \\(#function)"))
+""",
             macros: testMacros
         )
         assertMacroExpansion(
@@ -183,11 +153,8 @@ final class SmartLogTests: XCTestCase {
             #log(logger, .error, #function(a), customLoggingFunction: hey)
             """,
             expandedSource: """
-            {
-                logger.log(level: .error, #function(a))
-                hey("[logger] Error: \\(#function(a))")
-            }()
-            """,
+_ = (logger.log(level: .error, #function(a)), hey("[logger] Error: \\(#function(a))"))
+""",
             macros: testMacros
         )
         #else
@@ -202,11 +169,8 @@ final class SmartLogTests: XCTestCase {
             #log(logger, .error, "", customLoggingFunction: hey)
             """,
             expandedSource: """
-            {
-                logger.log(level: .error, "")
-                hey("[logger] Error: ")
-            }()
-            """,
+_ = (logger.log(level: .error, ""), hey("[logger] Error: "))
+""",
             macros: testMacros
         )
         assertMacroExpansion(
@@ -214,11 +178,8 @@ final class SmartLogTests: XCTestCase {
             #log(logger, .error, "", customLoggingFunction: Class.hey)
             """,
             expandedSource: """
-            {
-                logger.log(level: .error, "")
-                Class.hey("[logger] Error: ")
-            }()
-            """,
+_ = (logger.log(level: .error, ""), Class.hey("[logger] Error: "))
+""",
             macros: testMacros
         )
         assertMacroExpansion(
@@ -226,11 +187,8 @@ final class SmartLogTests: XCTestCase {
             #log(logger, .error, "", customLoggingFunction: Class.singleton().hey)
             """,
             expandedSource: """
-            {
-                logger.log(level: .error, "")
-                Class.singleton().hey("[logger] Error: ")
-            }()
-            """,
+_ = (logger.log(level: .error, ""), Class.singleton().hey("[logger] Error: "))
+""",
             macros: testMacros
         )
         #else
@@ -341,11 +299,8 @@ final class SmartLogTests: XCTestCase {
             #log(.network, .info, "test", customLoggingFunction: hey)
             """,
             expandedSource: """
-            {
-                Logger.network.log(level: .info, "test")
-                hey("[network] Info: test")
-            }()
-            """,
+_ = (Logger.network.log(level: .info, "test"), hey("[network] Info: test"))
+""",
             macros: testMacros
         )
         
@@ -355,11 +310,8 @@ final class SmartLogTests: XCTestCase {
             #log(Logger.auth, .error, "failed", customLoggingFunction: hey)
             """,
             expandedSource: """
-            {
-                Logger.auth.log(level: .error, "failed")
-                hey("[auth] Error: failed")
-            }()
-            """,
+_ = (Logger.auth.log(level: .error, "failed"), hey("[auth] Error: failed"))
+""",
             macros: testMacros
         )
         
@@ -369,11 +321,8 @@ final class SmartLogTests: XCTestCase {
             #log(.database, .debug, "query", customLoggingFunction: hey)
             """,
             expandedSource: """
-            {
-                Logger.database.log(level: .debug, "query")
-                hey("[database] Debug: query")
-            }()
-            """,
+_ = (Logger.database.log(level: .debug, "query"), hey("[database] Debug: query"))
+""",
             macros: testMacros
         )
         
@@ -382,11 +331,8 @@ final class SmartLogTests: XCTestCase {
             #log(.api, .fault, "critical", customLoggingFunction: hey)
             """,
             expandedSource: """
-            {
-                Logger.api.log(level: .fault, "critical")
-                hey("[api] Fault: critical")
-            }()
-            """,
+_ = (Logger.api.log(level: .fault, "critical"), hey("[api] Fault: critical"))
+""",
             macros: testMacros
         )
         
@@ -396,11 +342,8 @@ final class SmartLogTests: XCTestCase {
             #log(.network, OSLogType.error, "test", customLoggingFunction: hey)
             """,
             expandedSource: """
-            {
-                Logger.network.log(level: OSLogType.error, "test")
-                hey("[network] Error: test")
-            }()
-            """,
+_ = (Logger.network.log(level: OSLogType.error, "test"), hey("[network] Error: test"))
+""",
             macros: testMacros
         )
         #else
